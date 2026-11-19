@@ -1,0 +1,7 @@
+name: kore-xo-dialogs
+version: 0.1.0
+description: Import, edit (dialogs as JSON specs) and build per-environment import zips for Kore.ai XO bots
+author: vovarova
+type: skill
+targets: [claude]
+includes: auto

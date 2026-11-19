@@ -5,6 +5,12 @@ dialogs through JSON specs with Claude, and build an import zip per environment,
 dialog builder.
 
 ## Install (either way)
+With [APM](https://microsoft.github.io/apm/) (package `vovarova/kore-xo-dialogs`, pin a release with `#vX.Y.Z`):
+```
+apm install -g --target claude vovarova/kore-xo-dialogs#v0.1.0   # per user  -> ~/.claude/skills/kore-xo-dialogs
+apm install --target claude vovarova/kore-xo-dialogs#v0.1.0      # per repo  -> .claude/skills/kore-xo-dialogs
+```
+Or by hand:
 - **Per user**: copy this folder to `~/.claude/skills/kore-xo-dialogs/`. Bot projects then call
   `python "$HOME/.claude/skills/kore-xo-dialogs/scripts/kore.py"`, so every teammate installs it the same way.
 - **Per repo**: commit this folder as `<repo>/.claude/skills/kore-xo-dialogs/`. Bot folders inside that repo (the
