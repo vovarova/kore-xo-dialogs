@@ -1,0 +1,74 @@
+{
+  "dialog": "Check Baggage Allowance",
+  "description": "Tells the user the baggage allowance for their booking class",
+  "intent": {
+    "utterances": ["what is my baggage allowance", "how many bags can I take", "baggage limit"]
+  },
+  "start": "AskTravelClass",
+  "nodes": [
+    {
+      "name": "AskTravelClass",
+      "type": "entity",
+      "entityType": "string",
+      "text": "Which class are you travelling in: economy or business?",
+      "errorPrompts": ["Please answer economy or business."],
+      "next": "ResolveAllowance"
+    },
+    {
+      "name": "ResolveAllowance",
+      "type": "script",
+      "script": "var cls = (context.entities.AskTravelClass || '').toLowerCase();\ncontext.baggageKg = cls.indexOf('business') > -1 ? 40 : 20;\ncontext.isBusiness = cls.indexOf('business') > -1;",
+      "transitions": [
+        { "if": { "context": "context.isBusiness", "op": "eq", "value": "true" }, "to": "BusinessAllowance" },
+        { "default": "LookupFare" }
+      ]
+    },
+    {
+      "name": "BusinessAllowance",
+      "type": "message",
+      "text": "Business class: {{context.baggageKg}} kg checked baggage plus 2 cabin bags.",
+      "next": "end"
+    },
+    {
+      "name": "LookupFare",
+      "type": "service",
+      "method": "get",
+      "url": "{{env.FLIGHT_API}}/fares/economy",
+      "headers": { "Content-Type": "application/json" },
+      "next": "OfferUpgrade"
+    },
+    {
+      "name": "OfferUpgrade",
+      "type": "confirmation",
+      "text": "Economy includes {{context.baggageKg}} kg. Would you like to hear about upgrading to business?",
+      "yes": "UpgradeAgent",
+      "no": "EconomyAllowance"
+    },
+    {
+      "name": "UpgradeAgent",
+      "type": "agent",
+      "systemContext": "You explain the benefits of upgrading from economy to business class using {{context.LookupFare.response.body}}. Be brief.",
+      "rules": ["Never promise a price that is not in the fare data."],
+      "exitScenarios": ["exit when the user is done asking about the upgrade"],
+      "next": "SummarisePrompt"
+    },
+    {
+      "name": "SummarisePrompt",
+      "type": "prompt",
+      "prompt": "Summarise the baggage allowance ({{context.baggageKg}} kg) in one friendly sentence.",
+      "next": "SummaryMessage"
+    },
+    {
+      "name": "SummaryMessage",
+      "type": "message",
+      "text": "{{context.GenerativeAINode.SummarisePrompt.text}}",
+      "next": "end"
+    },
+    {
+      "name": "EconomyAllowance",
+      "type": "message",
+      "text": "Economy class: {{context.baggageKg}} kg checked baggage plus 1 cabin bag.",
+      "next": "end"
+    }
+  ]
+}
